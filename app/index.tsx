@@ -3,37 +3,44 @@ import * as AuthSession from 'expo-auth-session';
 import { useRouter } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { useCallback, useEffect } from "react";
-import { Image, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from "react-native";
 import Colors from "../services/Colors";
 
 export const useWarmUpBrowser = () => {
   useEffect(() => {
-    if (Platform.OS !== 'android') return
-    void WebBrowser.warmUpAsync()
+    if (Platform.OS !== 'android') return;
+
+    WebBrowser.warmUpAsync();
+
     return () => {
-      void WebBrowser.coolDownAsync()
-    }
-  }, [])
-}
+      WebBrowser.coolDownAsync();
+    };
+  }, []);
+};
 
 WebBrowser.maybeCompleteAuthSession();
 
 export default function Index() {
 
-  useWarmUpBrowser()
-  const router = useRouter()
-  const { user } = useUser()
-  const { startSSOFlow } = useSSO()
+  useWarmUpBrowser();
+
+  const router = useRouter();
+  const { user } = useUser(); // (you are not using it but keeping same)
+  const { startSSOFlow } = useSSO();
 
   const onPress = useCallback(async () => {
     try {
 
-      // ✅ MOVED HERE
-      await WebBrowser.openBrowserAsync("about:blank");
-
       const redirectUrl = AuthSession.makeRedirectUri({
-        scheme: "businessdirectory",
-        path: "ss-callback",
+        scheme: "clerkexpo",   // must match app.json
       });
 
       const { createdSessionId, setActive } = await startSSOFlow({
@@ -42,18 +49,14 @@ export default function Index() {
       });
 
       if (createdSessionId) {
-        setActive!({
-          session: createdSessionId,
-          navigate: async () => {
-            router.replace('/(tabs)/home')
-          },
-        })
+        await setActive!({ session: createdSessionId });
+        router.replace('/landing');   // correct
       }
 
     } catch (err) {
-      console.error(JSON.stringify(err, null, 2))
+      console.error("Login error:", err);
     }
-  }, [startSSOFlow, router])
+  }, [startSSOFlow, router]);
 
   return (
     <ScrollView>
@@ -83,7 +86,7 @@ export default function Index() {
 
       </View>
     </ScrollView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -102,6 +105,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 99,
     padding: 15,
-    marginTop: 15
+    marginTop: 15,
   }
 });

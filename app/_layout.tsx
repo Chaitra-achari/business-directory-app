@@ -1,7 +1,7 @@
-import { Stack } from "expo-router";
-import { ActivityIndicator } from "react-native";
 import { ClerkProvider } from "@clerk/clerk-expo";
 import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import { ActivityIndicator } from "react-native";
 
 export default function RootLayout() {
 
@@ -16,7 +16,7 @@ export default function RootLayout() {
 
   return (
     <ClerkProvider>
-      <Stack />
+      <Stack screenOptions={{ headerShown: false }} />
     </ClerkProvider>
   );
 }
